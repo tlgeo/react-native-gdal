@@ -1,9 +1,11 @@
 package com.gdal
 
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.ReadableArray
+
 
 class GdalModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -12,11 +14,21 @@ class GdalModule(reactContext: ReactApplicationContext) :
     return NAME
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
   fun multiply(a: Double, b: Double, promise: Promise) {
     promise.resolve(a * b)
+  }
+
+  @ReactMethod
+  fun RNOgr2ogr(args: ReadableArray, promise: Promise) {
+    // Convert ReadableArray to String[]
+    val strArgs = arrayOfNulls<String>(args.size())
+    for (i in 0 until args.size()) {
+      strArgs[i] = args.getString(i)
+    }
+    // Pass the string array to ogr2ogr
+    ogr2ogr.main(strArgs)
+    promise.resolve("Success")
   }
 
   companion object {
