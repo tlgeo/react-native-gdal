@@ -20,3 +20,7 @@ const Gdal = NativeModules.Gdal
 export function multiply(a: number, b: number): Promise<number> {
   return Gdal.multiply(a, b);
 }
+
+export function ogr2ogr(agrs: string[]): Promise<string> {
+  return Gdal.RNOgr2ogr(agrs);
+}
