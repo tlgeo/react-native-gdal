@@ -24,3 +24,11 @@ export function multiply(a: number, b: number): Promise<number> {
 export function ogr2ogr(agrs: string[]): Promise<string> {
   return Gdal.RNOgr2ogr(agrs);
 }
+
+export function ogrinfo(agrs: string[]): Promise<string> {
+  return Gdal.RNOgrinfo(agrs);
+}
+
+export function gdalinfo(agrs: string[]): Promise<string> {
+  return Gdal.RNGdalinfo(agrs);
+}
