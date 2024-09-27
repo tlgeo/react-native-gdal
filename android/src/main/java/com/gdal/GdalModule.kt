@@ -55,6 +55,18 @@ class GdalModule(reactContext: ReactApplicationContext) :
     promise.resolve("Success")
   }
 
+  @ReactMethod
+  fun RNGdalTranslate(args: ReadableArray, promise: Promise) {
+    // Convert ReadableArray to String[]
+    val strArgs = arrayOfNulls<String>(args.size())
+    for (i in 0 until args.size()) {
+      strArgs[i] = args.getString(i)
+    }
+    // Pass the string array to ogr2ogr
+    gdal_translate.main(strArgs)
+    promise.resolve("Success")
+  }
+
   companion object {
     const val NAME = "Gdal"
   }
