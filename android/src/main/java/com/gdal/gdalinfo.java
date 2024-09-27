@@ -518,8 +518,7 @@ public class gdalinfo {
           if (bShowColorTable)
           {
             for (count = 0; count < hTable.GetCount(); count++) {
-              System.out.println(" " + count + ": "
-                + hTable.GetColorEntry(count));
+              System.out.println(" " + count + ": ");
             }
           }
         }
