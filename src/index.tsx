@@ -32,3 +32,7 @@ export function ogrinfo(agrs: string[]): Promise<string> {
 export function gdalinfo(agrs: string[]): Promise<string> {
   return Gdal.RNGdalinfo(agrs);
 }
+
+export function gdal_translate(agrs: string[]): Promise<string> {
+  return Gdal.RNGdalTranslate(agrs);
+}
