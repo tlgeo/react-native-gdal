@@ -1,6 +1,6 @@
 {
   "name": "@tlgeo/react-native-gdal",
-  "version": "0.1.4",
+  "version": "0.1.6",
   "description": "GDAL port to React Native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
@@ -36,11 +36,10 @@
     "!**/.*"
   ],
   "scripts": {
-    "example": "yarn workspace react-native-gdal-example",
     "test": "jest",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
+    "clean": "del-cli android/build lib",
     "prepare": "bob build",
     "release": "release-it"
   },
@@ -90,14 +89,10 @@
     "react": "*",
     "react-native": "*"
   },
-  "workspaces": [
-    "example"
-  ],
   "packageManager": "yarn@3.6.1",
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
-      "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
     ]
   },
@@ -185,7 +180,6 @@
   },
   "types": "./lib/typescript/commonjs/src/index.d.ts",
   "directories": {
-    "example": "example",
     "lib": "lib"
   },
   "dependencies": {
@@ -763,7 +757,6 @@
     "rc": "^1.2.8",
     "react-devtools-core": "^5.3.1",
     "react-is": "^18.3.1",
-    "react-native-gdal-example": "^0.0.1",
     "react-refresh": "^0.14.2",
     "read-pkg": "^3.0.0",
     "read-pkg-up": "^3.0.0",
