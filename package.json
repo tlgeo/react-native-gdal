@@ -1,6 +1,6 @@
 {
   "name": "@tlgeo/react-native-gdal",
-  "version": "0.1.2",
+  "version": "0.1.4",
   "description": "GDAL port to React Native",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",

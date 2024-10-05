@@ -1,2 +1,7 @@
 #import <React/RCTBridgeModule.h>
-#import <React/RCTViewManager.h>
+
+#include "gdal.h"
+#include "ogr_api.h"
+#include "ogr_srs_api.h"
+#include "proj.h"
+#include "gdal_utils.h"

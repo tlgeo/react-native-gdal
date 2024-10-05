@@ -1,0 +1,10 @@
+module gdal {
+    header "gdal.h"
+    header "ogr_api.h"
+    header "ogr_srs_api.h"
+    header "proj.h"
+    header "gdal_utils.h"
+    header "expat.h"
+    link "gdal"
+    export *
+}
