@@ -1,28 +1,27 @@
 @objc(Gdal)
 class Gdal: NSObject {
 
-    @objc(multiply:withB:withResolver:withRejecter:)
-    func multiply(
-        a: Float, b: Float, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock
+    @objc(getDrivers:withRejecter:)
+    func getDrivers(
+        resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock
     ) {
         GDALAllRegister()
 
         let driverCount = GDALGetDriverCount()
 
         print("Available GDAL Drivers:")
+        var drivers: [String] = []
 
         for i in 0..<driverCount {
-            // Get the driver by index
             if let driver = GDALGetDriver(i) {
-                // Get the driver name
                 if let driverName = GDALGetDriverShortName(driver) {
-                    // Convert the C-string to Swift String
                     let name = String(cString: driverName)
-                    print("Driver \(i): \(name)")
+                    drivers.append(name)
                 }
             }
         }
-        resolve(a * b)
+
+        resolve(drivers)
     }
 
     @objc(RNOgr2ogr:withResolver:withRejecter:)

@@ -9,16 +9,16 @@ const LINKING_ERROR =
 const Gdal = NativeModules.Gdal
   ? NativeModules.Gdal
   : new Proxy(
-      {},
-      {
-        get() {
-          throw new Error(LINKING_ERROR);
-        },
-      }
-    );
+    {},
+    {
+      get() {
+        throw new Error(LINKING_ERROR);
+      },
+    }
+  );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return Gdal.multiply(a, b);
+export function getDrivers(): Promise<string[]> {
+  return Gdal.getDrivers();
 }
 
 export function ogr2ogr(agrs: string[]): Promise<string> {
