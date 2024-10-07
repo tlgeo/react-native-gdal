@@ -27,8 +27,8 @@ class Gdal: NSObject {
 
     @objc(RNOgr2ogr:withResolver:withRejecter:)
     func RNOgr2ogr(args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        ogr2ogr_translate(inputDGN: args[3], outputGeoJSON: args[2])
-        resolve("abc")
+        ogr2ogr_translate(args: args)
+        resolve(args[2])
     }
 
     // Function to convert an array of Swift strings to a C-style array of C strings
@@ -46,17 +46,9 @@ class Gdal: NSObject {
         return array
     }
 
-    func ogr2ogr_translate(inputDGN: String, outputGeoJSON: String) {
-        // guard let inputDGNUrl = URL(string: inputDGN), let outputGeoJSONUrl = URL(string: outputGeoJSON) else {
-        //   print("Invalid URL strings.")
-        //   return
-        // }
-
-        
-
-        // inputDGNUrl.startAccessingSecurityScopedResource()
-        // outputGeoJSONUrl.startAccessingSecurityScopedResource()
-        // Register all drivers
+    func ogr2ogr_translate(args: [String]) {
+        let inputDGN = args[3]
+        let outputGeoJSON = args[2]
         GDALAllRegister()
 
         // Open input dataset
@@ -86,30 +78,8 @@ class Gdal: NSObject {
         let layerName = String(cString: OGR_L_GetName(layer))
         print("Layer Name: \(layerName)")
 
-        // Prepare arguments for GDALVectorTranslate
-        //        var options = [UnsafeMutablePointer<CChar>?]()
-        //
-        ////        options.append(UnsafeMutablePointer(mutating: "-f"))  // Output format
-        ////        options.append(UnsafeMutablePointer(mutating: "GeoJSON"))
-        //        options.append(UnsafeMutablePointer(mutating: "-t_srs"))
-        //        options.append(UnsafeMutablePointer(mutating: "\"EPSG:4326\""))
-        //        options.append(UnsafeMutablePointer(mutating: "-s_srs"))
-        //        options.append(UnsafeMutablePointer(mutating: "+proj=tmerc +lat_0=0 +lon_0=105 +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs"))
-        //
-        //        options.append(UnsafeMutablePointer(mutating: "-overwrite"))  // Enable overwriting
-        ////        options.append(UnsafeMutablePointer(mutating: "Layer #0"))
-        //
-        //        options.append(UnsafeMutablePointer(mutating: "LAYER=elements"))
-        //        options.append(nil)
-        let optionsArray = [
-            "-f", "Mbtiles",
-            "-dsco", "MINZOOM=0", "-dsco", "MAXZOOM=18",
-            "-t_srs", "+proj=longlat +datum=WGS84 +no_defs +type=crs",
-            //                            "-s_srs", "+proj=tmerc +lat_0=0 +lon_0=105 +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs"
-            "-s_srs",
-            "+proj=tmerc +lat_0=0 +lon_0=105 +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs",
-            layerName,
-        ]
+        var optionsArray = args.enumerated().filter { index, _ in index != 2 && index != 3 }.map { $0.element }
+        optionsArray.append(layerName)
         var options = cStringArray(from: optionsArray)
         // Translate options for GDALVectorTranslate
         let translateOptions = GDALVectorTranslateOptionsNew(options, nil)
