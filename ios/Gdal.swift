@@ -40,6 +40,12 @@ class Gdal: NSObject {
         resolve(gdalinfo(args: args))
     }
 
+    @objc(RNGdalTranslate:withResolver:withRejecter:)
+    func RNGdalTranslate(args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        gdal_translate(args: args)
+        resolve(args[2])
+    }
+
     
 
     // Function to convert an array of Swift strings to a C-style array of C strings
@@ -57,15 +63,63 @@ class Gdal: NSObject {
         return array
     }
 
+    func gdal_translate(args: [String]) {
+        let input = args[3]
+        let output = args[2]
+        
+        print("input \(input)")
+        print("output \(output)")
+        
+        GDALAllRegister()
+
+        // Open input dataset
+        guard
+            let inputDataset = GDALOpen(
+                input.cString(using: .utf8), GA_ReadOnly)
+        else {
+            print("Failed to open input dataset.")
+            return
+        }
+
+        var optionsArray = args.enumerated().filter { index, _ in index != 2 && index != 3 }.map { $0.element }
+        var options = cStringArray(from: optionsArray)
+        // Translate options for GDALVectorTranslate
+        let translateOptions = GDALTranslateOptionsNew(options, nil)
+
+        //        var srcDS: [OpaquePointer?] = [OpaquePointer(inputDataset)]
+        var srcDS: GDALDatasetH? = inputDataset
+        // Translate input dataset to GeoJSON
+        let geojsonDataset = GDALTranslate(
+            output.cString(using: .utf8),  // Output file
+            srcDS,  // Source dataset
+            translateOptions,  // translateOptions,                        // Translation options
+            nil  // Progress callback
+        )
+
+        // Cleanup
+        GDALTranslateOptionsFree(translateOptions)
+        GDALClose(inputDataset)
+        if geojsonDataset != nil {
+            GDALClose(geojsonDataset)
+        }
+
+        if geojsonDataset == nil {
+            print("Failed to convert to GeoJSON.")
+        } else {
+            print("Successfully converted to GeoJSON")
+        }
+
+    }
+
     func ogr2ogr_translate(args: [String]) {
-        let inputDGN = args[3]
-        let outputGeoJSON = args[2]
+        let input = args[3]
+        let output = args[2]
         GDALAllRegister()
 
         // Open input dataset
         guard
             let inputDataset = GDALOpenEx(
-                inputDGN.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
+                input.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
         else {
             print("Failed to open input dataset.")
             return
@@ -100,7 +154,7 @@ class Gdal: NSObject {
         srcDS.withUnsafeMutableBufferPointer { srcDSPointer in
             // Translate input dataset to GeoJSON
             let geojsonDataset = GDALVectorTranslate(
-                outputGeoJSON.cString(using: .utf8),  // Output file
+                output.cString(using: .utf8),  // Output file
                 nil,  // Destination dataset (NULL for creating a new one)
                 1,  // Number of input datasets
                 UnsafeMutablePointer(srcDSPointer.baseAddress!),  // Input datasets array
@@ -125,13 +179,13 @@ class Gdal: NSObject {
     }
 
     func ogrinfo(args: [String]) -> String? {
-        let inputDGN = args[0]
+        let input = args[0]
         GDALAllRegister()
 
         // Open input dataset
         guard
             let inputDataset = GDALOpenEx(
-                inputDGN.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
+                input.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
         else {
             print("Failed to open input dataset.")
             return nil
@@ -178,13 +232,13 @@ class Gdal: NSObject {
     }
 
     func gdalinfo(args: [String]) -> String? {
-        let inputDGN = args[0]
+        let input = args[0]
         GDALAllRegister()
 
         // Open input dataset
         guard
             let inputDataset = GDALOpenEx(
-                inputDGN.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
+                input.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
         else {
             print("Failed to open input dataset.")
             return nil
