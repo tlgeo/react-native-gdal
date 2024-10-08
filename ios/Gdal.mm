@@ -9,6 +9,10 @@ RCT_EXTERN_METHOD(RNOgr2ogr:(NSArray<NSString *> *)args
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(RNOgrinfo:(NSArray<NSString *> *)args
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(RNGdalinfo:(NSArray<NSString *> *)args
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)

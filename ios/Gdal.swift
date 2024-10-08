@@ -30,6 +30,11 @@ class Gdal: NSObject {
         resolve(args[2])
     }
 
+    @objc(RNOgrinfo:withResolver:withRejecter:)
+    func RNOgrinfo(args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        resolve(ogrinfo(args: args))
+    }
+
     @objc(RNGdalinfo:withResolver:withRejecter:)
     func RNGdalinfo(args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         resolve(gdalinfo(args: args))
@@ -117,6 +122,59 @@ class Gdal: NSObject {
             }
         }
 
+    }
+
+    func ogrinfo(args: [String]) -> String? {
+        let inputDGN = args[0]
+        GDALAllRegister()
+
+        // Open input dataset
+        guard
+            let inputDataset = GDALOpenEx(
+                inputDGN.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
+        else {
+            print("Failed to open input dataset.")
+            return nil
+        }
+
+        // Get the first layer name (you can modify this to use a specific layer index if needed)
+        let layerCount = GDALDatasetGetLayerCount(inputDataset)
+        guard layerCount > 0 else {
+            print("No layers found in the dataset.")
+            GDALClose(inputDataset)
+            return nil
+        }
+
+        // Fetch the first layer
+        guard let layer = GDALDatasetGetLayer(inputDataset, 0) else {
+            print("Failed to get the layer.")
+            GDALClose(inputDataset)
+            return nil
+        }
+
+        // Get layer name
+        let layerName = String(cString: OGR_L_GetName(layer))
+        print("Layer Name: \(layerName)")
+
+        // Prepare options for GDALInfo
+        var optionsArray = args.enumerated().filter { index, _ in index != 0 }.map { $0.element }
+        optionsArray.append(layerName)
+        var options = cStringArray(from: optionsArray)
+        let infoOptions = GDALVectorInfoOptionsNew(options, nil)
+
+        // Get information about the dataset
+        if let info = GDALVectorInfo(inputDataset, infoOptions) {
+            let infoString = String(cString: info)
+            print("Dataset Info: \(infoString)")
+            GDALVectorInfoOptionsFree(infoOptions)
+            return infoString
+            GDALClose(inputDataset)
+        } else {
+            print("Failed to get dataset info.")
+            GDALVectorInfoOptionsFree(infoOptions)
+            return nil
+            GDALClose(inputDataset)
+        }
     }
 
     func gdalinfo(args: [String]) -> String? {
