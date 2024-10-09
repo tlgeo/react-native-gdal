@@ -8,17 +8,17 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableArray
-import org.gdal.gdal.Dataset
 import org.gdal.gdal.InfoOptions
+import org.gdal.gdal.TranslateOptions
 import org.gdal.gdal.VectorInfoOptions
+import org.gdal.gdal.VectorTranslateOptions
 import org.gdal.gdal.gdal
 import org.gdal.gdal.gdal.AllRegister
 import org.gdal.gdal.gdal.GDALInfo
-import org.gdal.ogr.ogr
 import org.gdal.gdal.gdal.GDALVectorInfo
 import org.gdal.gdal.gdal.Open
-import org.gdal.gdal.gdal.GetLastErrorMsg
 import org.gdal.gdal.gdal.OpenEx
+import org.gdal.gdalconst.gdalconst
 import java.util.Vector
 
 
@@ -59,67 +59,97 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
 
   @ReactMethod
-  fun RNOgr2ogr(args: ReadableArray, promise: Promise) {
-    // Convert ReadableArray to String[]
+  fun RNOgr2ogr(srcPath: String, destPath: String, args: ReadableArray, promise: Promise) {
     val strArgs = arrayOfNulls<String>(args.size())
     for (i in 0 until args.size()) {
       strArgs[i] = args.getString(i)
     }
-    // Pass the string array to ogr2ogr
-    ogr2ogr.main(strArgs)
-    promise.resolve("Success")
+    AllRegister()
+
+    var src: String = srcPath
+    var dest: String = destPath
+    val newArgs = Vector<String>()
+
+    // Mở dataset nguồn
+    val srcDS = OpenEx(src)
+
+    if (srcDS == null) {
+      System.err.println("Không thể mở dataset nguồn.")
+      promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+    }
+
+    // Sử dụng Translate để chuyển đổi dataset sang tệp đích
+    val outDS = gdal.VectorTranslate(dest, srcDS, VectorTranslateOptions(newArgs))
+
+    if (outDS == null) {
+      System.err.println("Dịch không thành công.")
+      promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
+    }
+
+    println("Dịch thành công.")
+    promise.resolve(destPath)
   }
 
   @ReactMethod
-  fun RNOgrinfo(args: ReadableArray, promise: Promise) {
+  fun RNOgrinfo(srcPath: String, args: ReadableArray, promise: Promise) {
     AllRegister()
-    val strArgs = arrayOfNulls<String>(args.size())
+    val vectorArgs = Vector<String>()
+    val inputString = srcPath
     for (i in 0 until args.size()) {
-      strArgs[i] = args.getString(i)
-    }
-    val inputString = args.getString(0)
-    val args = Vector<String>()
-    for (i in strArgs.indices) {
-      if (i != 0) {
-        args.add(strArgs[i])
-      }
+      vectorArgs.add(args.getString(i))
     }
     val dataset = OpenEx(inputString)
-    var vectorInfoOptions = VectorInfoOptions(args)
+    var vectorInfoOptions = VectorInfoOptions(vectorArgs)
     val ogrInfo = GDALVectorInfo(dataset, vectorInfoOptions)
     promise.resolve(ogrInfo)
   }
 
   @ReactMethod
-  fun RNGdalinfo(args: ReadableArray, promise: Promise) {
+  fun RNGdalinfo(srcPath: String, args: ReadableArray, promise: Promise) {
     AllRegister()
-    val strArgs = arrayOfNulls<String>(args.size())
+    val inputString = srcPath
+    val vectorArgs = Vector<String>()
     for (i in 0 until args.size()) {
-      strArgs[i] = args.getString(i)
-    }
-    val inputString = args.getString(0)
-    val args = Vector<String>()
-    for (i in strArgs.indices) {
-      if (i != 0) {
-        args.add(strArgs[i])
-      }
+      vectorArgs.add(args.getString(i))
     }
     val dataset = OpenEx(inputString)
-    var infoOptions = InfoOptions(args)
+    var infoOptions = InfoOptions(vectorArgs)
+    Log.d("TLGEO", "args: " + vectorArgs)
     val gdalInfo = GDALInfo(dataset, infoOptions)
     promise.resolve(gdalInfo)
   }
 
   @ReactMethod
-  fun RNGdalTranslate(args: ReadableArray, promise: Promise) {
+  fun RNGdalTranslate(srcPath: String, destPath: String, args: ReadableArray, promise: Promise) {
     // Convert ReadableArray to String[]
     val strArgs = arrayOfNulls<String>(args.size())
     for (i in 0 until args.size()) {
       strArgs[i] = args.getString(i)
     }
-    // Pass the string array to ogr2ogr
-    gdal_translate.main(strArgs)
-    promise.resolve("Success")
+    AllRegister()
+
+    var src: String = srcPath
+    var dest: String = destPath
+    val newArgs = Vector<String>()
+
+    // Mở dataset nguồn
+    val srcDS = Open(src, gdalconst.GA_ReadOnly)
+
+    if (srcDS == null) {
+      System.err.println("Không thể mở dataset nguồn.")
+        promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+    }
+
+    // Sử dụng Translate để chuyển đổi dataset sang tệp đích
+    val outDS = gdal.Translate(dest, srcDS, TranslateOptions(newArgs))
+
+    if (outDS == null) {
+      System.err.println("Dịch không thành công.")
+      promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
+    }
+
+    println("Dịch thành công.")
+    promise.resolve(destPath)
   }
 
   companion object {
