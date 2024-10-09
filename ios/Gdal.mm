@@ -5,19 +5,25 @@
 RCT_EXTERN_METHOD(getDrivers:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(RNOgr2ogr:(NSArray<NSString *> *)args
+RCT_EXTERN_METHOD(RNOgr2ogr:(NSString *)srcPath
+                 withDestPath:(NSString *)destPath
+                 withArgs:(NSArray<NSString *> *)args
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(RNOgrinfo:(NSArray<NSString *> *)args
-                  withResolver:(RCTPromiseResolveBlock)resolve
-                  withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(RNOgrinfo:(NSString *)srcPath
+                 withArgs:(NSArray<NSString *> *)args
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(RNGdalTranslate:(NSArray<NSString *> *)args
-          withResolver:(RCTPromiseResolveBlock)resolve
-          withRejecter:(RCTPromiseRejectBlock)reject)
+RCT_EXTERN_METHOD(RNGdalTranslate:(NSString *)srcPath
+                 withDestPath:(NSString *)destPath
+                 withArgs:(NSArray<NSString *> *)args
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(RNGdalinfo:(NSArray<NSString *> *)args
+RCT_EXTERN_METHOD(RNGdalinfo:(NSString *)srcPath
+                 withArgs:(NSArray<NSString *> *)args
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 

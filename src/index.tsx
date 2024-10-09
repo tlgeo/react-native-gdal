@@ -21,18 +21,18 @@ export function getDrivers(): Promise<string[]> {
   return Gdal.getDrivers();
 }
 
-export function ogr2ogr(agrs: string[]): Promise<string> {
-  return Gdal.RNOgr2ogr(agrs);
+export function ogr2ogr(srcPath: string, destPath: string, agrs: string[]): Promise<string> {
+  return Gdal.RNOgr2ogr(srcPath, destPath, agrs);
 }
 
-export function ogrinfo(agrs: string[]): Promise<string> {
-  return Gdal.RNOgrinfo(agrs);
+export function ogrinfo(srcPath: string, agrs: string[]): Promise<string> {
+  return Gdal.RNOgrinfo(srcPath, agrs);
 }
 
-export function gdalinfo(agrs: string[]): Promise<string> {
-  return Gdal.RNGdalinfo(agrs);
+export function gdalinfo(srcPath: string, agrs: string[]): Promise<string> {
+  return Gdal.RNGdalinfo(srcPath, agrs);
 }
 
-export function gdal_translate(agrs: string[]): Promise<string> {
-  return Gdal.RNGdalTranslate(agrs);
+export function gdal_translate(srcPath: string, destPath: string, agrs: string[]): Promise<string> {
+  return Gdal.RNGdalTranslate(srcPath, destPath, agrs);
 }
