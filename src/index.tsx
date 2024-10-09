@@ -36,3 +36,7 @@ export function gdalinfo(srcPath: string, agrs: string[]): Promise<string> {
 export function gdal_translate(srcPath: string, destPath: string, agrs: string[]): Promise<string> {
   return Gdal.RNGdalTranslate(srcPath, destPath, agrs);
 }
+
+export function gdal_addo(srcPath: string, overviews: number[]): Promise<string> {
+  return Gdal.RNGdalAddo(srcPath, overviews);
+}

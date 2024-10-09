@@ -27,6 +27,11 @@ RCT_EXTERN_METHOD(RNGdalinfo:(NSString *)srcPath
                  withResolver:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(RNGdalAddo:(NSString *)srcPath
+                 withOverviews:(NSArray<NSNumber *> *)overviews
+                 withResolver:(RCTPromiseResolveBlock)resolve
+                 withRejecter:(RCTPromiseRejectBlock)reject)
+
 + (BOOL)requiresMainQueueSetup
 {
   return NO;

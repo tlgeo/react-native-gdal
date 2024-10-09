@@ -240,6 +240,44 @@ class Gdal: NSObject {
         resolve(destPath)
     }
 
+    @objc(RNGdalAddo:withOverviews:withResolver:withRejecter:)
+    func RNGdalAddo(srcPath: String, overviews: [Int], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        let input = srcPath
+        GDALAllRegister()
+
+        // Open input dataset
+        guard
+            let inputDataset = GDALOpen(
+                input.cString(using: .utf8), GA_Update)
+        else {
+            print("Failed to open input dataset.")
+            reject("1", "Failed to open input dataset.", nil)
+            return
+        }
+        
+        print("Opened dataset: \(inputDataset)")
+
+        // Convert [Int] to [Int32]
+        print("overviews \(overviews)")
+        let int32Overviews = overviews.map { Int32($0) }
+        
+        print("int32Overviews \(int32Overviews)")
+
+        // Add overviews
+        let result = GDALBuildOverviews(inputDataset, "AVERAGE", Int32(int32Overviews.count), int32Overviews, 0, nil, nil, nil)
+
+        if result == CE_None {
+            print("Successfully added overviews.")
+            resolve("Successfully added overviews.")
+        } else {
+            print("Failed to add overviews.")
+            reject("1", "Failed to add overviews.", nil)
+        }
+
+        GDALClose(inputDataset)
+    }
+
+
     
 
     // Function to convert an array of Swift strings to a C-style array of C strings
