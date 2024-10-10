@@ -40,3 +40,13 @@ export function gdal_translate(srcPath: string, destPath: string, agrs: string[]
 export function gdal_addo(srcPath: string, overviews: number[]): Promise<string> {
   return Gdal.RNGdalAddo(srcPath, overviews);
 }
+
+// You must copy the proj.db file from the assets folder to the app's data folder
+export function setAndroidProjLibPath(path: string): void {
+  if (Platform.OS === 'android') {
+    Gdal.RNSetProjLibPath(path);
+  }
+  else {
+    console.warn('setAndroidProjLibPath only works on Android');
+  }
+}

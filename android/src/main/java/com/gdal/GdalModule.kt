@@ -1,5 +1,6 @@
 package com.gdal
 
+import android.system.Os
 import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
@@ -137,7 +138,7 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
     if (srcDS == null) {
       System.err.println("Không thể mở dataset nguồn.")
-        promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+      promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
     }
 
     // Sử dụng Translate để chuyển đổi dataset sang tệp đích
@@ -150,6 +151,48 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
     println("Dịch thành công.")
     promise.resolve(destPath)
+  }
+
+  @ReactMethod
+  fun RNSetProjLibPath(projLibPath: String, promise: Promise) {
+    try {
+      Os.setenv("PROJ_LIB", projLibPath, true)
+      promise.resolve("Success")
+    } catch (e: Exception) {
+      promise.reject("ERROR_SET_PROJ_LIB", e)
+    }
+  }
+
+  @ReactMethod
+  fun RNGdalAddo(srcPath: String, overviews: ReadableArray, promise: Promise) {
+    try {
+      AllRegister()
+
+      Os.setenv("PROJ_LIB", "/data/user/0/xyz.tlgeo.geocollect/files/proj", true)
+      val dataset = OpenEx(srcPath, gdalconst.GA_Update.toLong())
+
+
+      if (dataset == null) {
+        Log.d("TLGEO", "RNGdalAddo: " + gdal.GetLastErrorMsg())
+        promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+        return
+      }
+
+      // Chuyển đổi ReadableArray thành IntArray
+      val levels = overviews.toArrayList().map {
+        // Chuyển thành Double trước rồi ép kiểu sang Int
+        (it as Double).toInt()
+      }.toIntArray()
+
+      // Thực hiện thêm overviews
+      dataset.BuildOverviews("NEAREST", levels)
+
+      // Trả về kết quả thành công
+      promise.resolve("Success")
+    } catch (e: Exception) {
+      // Bắt ngoại lệ và trả về lỗi
+      promise.reject("ERROR_ADDING_OVERVIEWS", e)
+    }
   }
 
   companion object {
