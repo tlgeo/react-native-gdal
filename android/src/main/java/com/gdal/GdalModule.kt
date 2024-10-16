@@ -61,15 +61,14 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun RNOgr2ogr(srcPath: String, destPath: String, args: ReadableArray, promise: Promise) {
-    val strArgs = arrayOfNulls<String>(args.size())
+    val newArgs = Vector<String>()
     for (i in 0 until args.size()) {
-      strArgs[i] = args.getString(i)
+      newArgs.add(args.getString(i))
     }
     AllRegister()
 
     var src: String = srcPath
     var dest: String = destPath
-    val newArgs = Vector<String>()
 
     // Mở dataset nguồn
     val srcDS = OpenEx(src)
@@ -86,8 +85,6 @@ class GdalModule(reactContext: ReactApplicationContext) :
       System.err.println("Dịch không thành công.")
       promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
     }
-
-    println("Dịch thành công.")
     promise.resolve(destPath)
   }
 
@@ -115,7 +112,6 @@ class GdalModule(reactContext: ReactApplicationContext) :
     }
     val dataset = OpenEx(inputString)
     var infoOptions = InfoOptions(vectorArgs)
-    Log.d("TLGEO", "args: " + vectorArgs)
     val gdalInfo = GDALInfo(dataset, infoOptions)
     promise.resolve(gdalInfo)
   }
@@ -123,15 +119,14 @@ class GdalModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun RNGdalTranslate(srcPath: String, destPath: String, args: ReadableArray, promise: Promise) {
     // Convert ReadableArray to String[]
-    val strArgs = arrayOfNulls<String>(args.size())
+    val newArgs = Vector<String>()
     for (i in 0 until args.size()) {
-      strArgs[i] = args.getString(i)
+      newArgs.add(args.getString(i))
     }
     AllRegister()
 
     var src: String = srcPath
     var dest: String = destPath
-    val newArgs = Vector<String>()
 
     // Mở dataset nguồn
     val srcDS = Open(src, gdalconst.GA_ReadOnly)
