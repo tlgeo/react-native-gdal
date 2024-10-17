@@ -15,11 +15,11 @@ React Native GDAL provides a bridge to the Geospatial Data Abstraction Library (
 ## Installation
 
 ```bash
-npm install your-react-native-gdal-package
+npm install @tlgeo/react-native-gdal
 ```
 or
 ```bash
-yarn add your-react-native-gdal-package
+yarn add @tlgeo/react-native-gdal
 ```
 
 ## Usage
