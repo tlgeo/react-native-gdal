@@ -1,59 +1,87 @@
-# react-native-gdal
-/**
- * @brief GDAL Library for Android and iOS
- *
- * This documentation provides an overview of the GDAL (Geospatial Data Abstraction Library) 
- * built specifically for Android and iOS platforms. GDAL is a translator library for raster 
- * and vector geospatial data formats that is released under an open-source license. It provides 
- * a single abstract data model to the calling application for all supported formats.
- *
- * Key Features:
- * - Supports a wide range of raster and vector geospatial data formats.
- * - Provides tools for data manipulation, conversion, and analysis.
- * - Optimized for performance on mobile platforms (Android and iOS).
- * - Includes bindings for various programming languages, including C++.
- *
- * Usage:
- * - Integrate the GDAL library into your Android or iOS application to handle geospatial data.
- * - Utilize the provided APIs to read, write, and transform geospatial data.
- * - Leverage the library's capabilities to perform complex geospatial operations on mobile devices.
- *
- * Dependencies:
- * - Ensure that your development environment is set up for cross-compiling for Android and iOS.
- * - Include necessary dependencies and configurations as per the GDAL build instructions for mobile platforms.
- *
- * For more information, refer to the official GDAL documentation and the specific build instructions 
- * for Android and iOS platforms.
- */
+# React Native GDAL
+
+React Native GDAL provides a bridge to the Geospatial Data Abstraction Library (GDAL) for React Native projects, enabling geospatial data manipulation and conversion functionalities directly from React Native apps. This library supports basic GDAL operations like retrieving driver information, converting formats, getting file info, and more.
+
+## Features
+
+- List supported GDAL drivers.
+- Convert geospatial data formats using `ogr2ogr`.
+- Retrieve data source information using `ogrinfo`.
+- Get detailed file information using `gdalinfo`.
+- Convert file formats with `gdal_translate`.
+- Generate raster overviews using `gdal_addo`.
+- Set the `proj.db` path on Android devices.
 
 ## Installation
 
-```sh
-npm install react-native-gdal
+```bash
+npm install your-react-native-gdal-package
+```
+or
+```bash
+yarn add your-react-native-gdal-package
 ```
 
 ## Usage
-
-
-```js
-import { ogr2ogr } from 'react-native-gdal';
-
-const result = await ogr2ogr('input.geojson', 'output.shp');
+### Importing the module
+```JavaScript
+import * as Gdal from '@tlgeo/react-native-gdal';
 ```
+### Get supported drivers
+```JavaScript
+Gdal.getDrivers().then(drivers => {
+  console.log(drivers);
+});
+```
+### Convert Between Vector File Formats with <code>ogr2ogr</code>
+```JavaScript
+const srcPath = 'path/to/source/file';
+const destPath = 'path/to/destination/file';
+const args = ['arg1', 'arg2'];
 
-## Notes
+Gdal.ogr2ogr(srcPath, destPath, args).then(result => {
+  console.log(result);
+});
+```
+### Get Vector Data Source Information with `ogrinfo`
+```JavaScript
+const srcPath = 'path/to/source/file';
+const args = ['arg1', 'arg2'];
 
-Currently, only ogr2ogr, ogrinfo and gdalinfo are supported on Android.
+Gdal.ogrinfo(srcPath, args).then(info => {
+  console.log(info);
+});
+```
+### Get Raster File Information with `gdalinfo`
+```JavaScript
+const srcPath = 'path/to/source/file';
+const args = ['arg1', 'arg2'];
 
+Gdal.gdalinfo(srcPath, args).then(info => {
+  console.log(info);
+});
+```
+### Convert Between Raster File Formats with `gdal_translate`
+```JavaScript
+const srcPath = 'path/to/source/file';
+const destPath = 'path/to/destination/file';
+const args = ['arg1', 'arg2'];
+
+Gdal.gdal_translate(srcPath, destPath, args).then(result => {
+  console.log(result);
+});
+```
+### Setting Android Projection Library Path
+```JavaScript
+const path = 'path/to/proj.db';
+
+Gdal.setAndroidProjLibPath(path);
+```
+### Platform Specific Notes
+The <code>setAndroidProjLibPath</code> function is only functional on Android devices. Ensure the <code>proj.db</code> file is copied from your assets folder to the app's data folder before setting the path.
 
 ## Contributing
-
-See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
+Contributions are welcome! Please fork the repository and submit a pull request with your features, fixes, or improvements.
 
 ## License
-
-MIT
-
----
-
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
+[MIT](https://mit-license.org/)
