@@ -163,7 +163,6 @@ class GdalModule(reactContext: ReactApplicationContext) :
     try {
       AllRegister()
 
-      Os.setenv("PROJ_LIB", "/data/user/0/xyz.tlgeo.geocollect/files/proj", true)
       val dataset = OpenEx(srcPath, gdalconst.GA_Update.toLong())
 
 
