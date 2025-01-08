@@ -1,6 +1,23 @@
 @objc(Gdal)
 class Gdal: NSObject {
 
+    @objc(RNStartAccessingSecurityScopedResource:withResolver:withRejecter:)
+    func RNStartAccessingSecurityScopedResource(filePath: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        guard let fileUrl = URL(string: filePath) else {
+            print("Invalid file path.")
+            reject("1", "Invalid file path.", nil)
+            return
+        }
+
+        let result = fileUrl.startAccessingSecurityScopedResource()
+        if result {
+            print("Successfully accessed security scoped resource.")
+            resolve("Successfully accessed security scoped resource.")
+        } else {
+            print("Failed to access security scoped resource.")
+            reject("1", "Failed to access security scoped resource.", nil)
+        }
+    }
     @objc(getDrivers:withRejecter:)
     func getDrivers(
         resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock

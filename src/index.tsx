@@ -17,6 +17,15 @@ const Gdal = NativeModules.Gdal
     }
   );
 
+export function startAccessingSecurityScopedResource(uri: string): boolean {
+  if (Platform.OS === 'ios') {
+    return Gdal.RNStartAccessingSecurityScopedResource(uri);
+  } else {
+    console.warn('startAccessingSecurityScopedResource only works on iOS');
+    return false;
+  }
+}
+
 export function getDrivers(): Promise<string[]> {
   return Gdal.getDrivers();
 }
