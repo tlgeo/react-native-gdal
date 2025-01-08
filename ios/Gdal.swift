@@ -29,6 +29,15 @@ class Gdal: NSObject {
         let output = destPath
         GDALAllRegister()
 
+        guard let inputUrl = URL(string: "file://\(input)"), let outputUrl = URL(string: "file://\(output)") else {
+            print("Invalid input or output path.")
+            reject("1", "Invalid input or output path.", nil)
+            return
+        }
+
+        inputUrl.startAccessingSecurityScopedResource()
+        outputUrl.startAccessingSecurityScopedResource()
+
         print("args \(args)")
 
         // Open input dataset
@@ -100,6 +109,15 @@ class Gdal: NSObject {
     func RNOgrinfo(srcPath: String, args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         let input = srcPath
         GDALAllRegister()
+        
+        guard let inputUrl = URL(string: "file://\(input)") else {
+            print("Invalid input or output path.")
+            reject("1", "Invalid input or output path.", nil)
+            return
+        }
+
+        let result = inputUrl.startAccessingSecurityScopedResource()
+        print("startAccessingSecurityScopedResource result \(result)")
 
         // Open input dataset
         guard
@@ -159,6 +177,15 @@ class Gdal: NSObject {
     func RNGdalinfo(srcPath: String, args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         let input = srcPath
         GDALAllRegister()
+        
+        guard let inputUrl = URL(string: "file://\(input)") else {
+            print("Invalid input or output path.")
+            reject("1", "Invalid input or output path.", nil)
+            return
+        }
+
+        let result = inputUrl.startAccessingSecurityScopedResource()
+        print("startAccessingSecurityScopedResource result \(result)")
 
         // Open input dataset
         guard
@@ -200,6 +227,15 @@ class Gdal: NSObject {
         print("output \(output)")
         
         GDALAllRegister()
+        
+        guard let inputUrl = URL(string: "file://\(input)"), let outputUrl = URL(string: "file://\(output)") else {
+            print("Invalid input or output path.")
+            reject("1", "Invalid input or output path.", nil)
+            return
+        }
+
+        inputUrl.startAccessingSecurityScopedResource()
+        outputUrl.startAccessingSecurityScopedResource()
 
         // Open input dataset
         guard
@@ -244,6 +280,14 @@ class Gdal: NSObject {
     func RNGdalAddo(srcPath: String, overviews: [Int], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         let input = srcPath
         GDALAllRegister()
+        
+        guard let inputUrl = URL(string: "file://\(input)") else {
+            print("Invalid input or output path.")
+            reject("1", "Invalid input or output path.", nil)
+            return
+        }
+
+        inputUrl.startAccessingSecurityScopedResource()
 
         // Open input dataset
         guard
