@@ -40,6 +40,7 @@ class Gdal: NSObject {
 
         resolve(drivers)
     }
+    
     @objc(RNOgr2ogr:withDestPath:withArgs:withResolver:withRejecter:)
     func RNOgr2ogr(srcPath: String, destPath: String, args: [String], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         let input = srcPath
@@ -57,17 +58,15 @@ class Gdal: NSObject {
 
         print("args \(args)")
 
-        // Open input dataset
-        guard
-            let inputDataset = GDALOpenEx(
-                input.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
+        // Mở dataset đầu vào
+        guard let inputDataset = GDALOpenEx(
+            input.cString(using: .utf8), UInt32(GDAL_OF_VECTOR), nil, nil, nil)
         else {
             print("Failed to open input dataset.")
             reject("1", "Failed to open input dataset.", nil)
             return
         }
 
-        // Get the first layer name (you can modify this to use a specific layer index if needed)
         let layerCount = GDALDatasetGetLayerCount(inputDataset)
         guard layerCount > 0 else {
             print("No layers found in the dataset.")
@@ -76,27 +75,34 @@ class Gdal: NSObject {
             return
         }
 
-        // Fetch the first layer
-        guard let layer = GDALDatasetGetLayer(inputDataset, 0) else {
-            print("Failed to get the layer.")
-            GDALClose(inputDataset)
-            reject("1", "Failed to get the layer.", nil)
-            return
+        var optionsArray = args
+
+        // Lặp qua tất cả các lớp và thêm chúng vào danh sách options
+        for i in 0..<layerCount {
+            if let layer = GDALDatasetGetLayer(inputDataset, i) {
+                let layerName = String(cString: OGR_L_GetName(layer))
+                optionsArray.append(layerName)
+            }
         }
 
-        let layerName = String(cString: OGR_L_GetName(layer))
-        print("Layer Name: \(layerName)")
+        print("Layer Names: \(optionsArray)")
 
-        var optionsArray = args
-        optionsArray.append(layerName)
+        let progressCallback: @convention(c) (Double, UnsafePointer<Int8>?, UnsafeMutableRawPointer?) -> Int32 = { progress, message, userData in
+            if let message = message {
+                print("Progress: \(Int(progress * 100))%, Message: \(String(cString: message))")
+            } else {
+                print("Progress: \(Int(progress * 100))%")
+            }
+            return 1 // Return 1 to continue processing, 0 to cancel
+        }
+
         var options = cStringArray(from: optionsArray)
-        // Translate options for GDALVectorTranslate
         let translateOptions = GDALVectorTranslateOptionsNew(options, nil)
 
-        //        var srcDS: [OpaquePointer?] = [OpaquePointer(inputDataset)]
         var srcDS: [GDALDatasetH?] = [inputDataset]
         srcDS.withUnsafeMutableBufferPointer { srcDSPointer in
-            // Translate input dataset to GeoJSON
+            GDALVectorTranslateOptionsSetProgress(translateOptions, progressCallback, nil)
+            
             let geojsonDataset = GDALVectorTranslate(
                 output.cString(using: .utf8),  // Output file
                 nil,  // Destination dataset (NULL for creating a new one)
@@ -106,20 +112,17 @@ class Gdal: NSObject {
                 nil  // Progress callback
             )
 
-            // Cleanup
             GDALVectorTranslateOptionsFree(translateOptions)
             GDALClose(inputDataset)
             if geojsonDataset != nil {
                 GDALClose(geojsonDataset)
-            }
-
-            if geojsonDataset == nil {
-                print("Failed to convert to GeoJSON.")
-            } else {
                 print("Successfully converted to GeoJSON")
+                resolve(output)
+            } else {
+                print("Failed to convert to GeoJSON.")
+                reject("1", "Failed to convert to GeoJSON.", nil)
             }
         }
-        resolve(output)
     }
 
     @objc(RNOgrinfo:withArgs:withResolver:withRejecter:)
