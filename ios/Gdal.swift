@@ -3,11 +3,7 @@ class Gdal: NSObject {
 
     @objc(RNStartAccessingSecurityScopedResource:withResolver:withRejecter:)
     func RNStartAccessingSecurityScopedResource(filePath: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        guard let fileUrl = URL(string: filePath) else {
-            print("Invalid file path.")
-            reject("1", "Invalid file path.", nil)
-            return
-        }
+        let fileUrl = URL(fileURLWithPath: filePath)
 
         let result = fileUrl.startAccessingSecurityScopedResource()
         if result {
@@ -47,11 +43,8 @@ class Gdal: NSObject {
         let output = destPath
         GDALAllRegister()
 
-        guard let inputUrl = URL(string: "file://\(input)"), let outputUrl = URL(string: "file://\(output)") else {
-            print("Invalid input or output path.")
-            reject("1", "Invalid input or output path.", nil)
-            return
-        }
+        let inputUrl = URL(fileURLWithPath: "file://\(input)")
+        let outputUrl = URL(fileURLWithPath: "file://\(output)")
 
         inputUrl.startAccessingSecurityScopedResource()
         outputUrl.startAccessingSecurityScopedResource()
@@ -130,11 +123,7 @@ class Gdal: NSObject {
         let input = srcPath
         GDALAllRegister()
         
-        guard let inputUrl = URL(string: "file://\(input)") else {
-            print("Invalid input or output path.")
-            reject("1", "Invalid input or output path.", nil)
-            return
-        }
+        let inputUrl = URL(fileURLWithPath: "file://\(input)")
 
         let result = inputUrl.startAccessingSecurityScopedResource()
         print("startAccessingSecurityScopedResource result \(result)")
@@ -198,11 +187,7 @@ class Gdal: NSObject {
         let input = srcPath
         GDALAllRegister()
         
-        guard let inputUrl = URL(string: "file://\(input)") else {
-            print("Invalid input or output path.")
-            reject("1", "Invalid input or output path.", nil)
-            return
-        }
+        let inputUrl = URL(fileURLWithPath: "file://\(input)")
 
         let result = inputUrl.startAccessingSecurityScopedResource()
         print("startAccessingSecurityScopedResource result \(result)")
@@ -248,11 +233,8 @@ class Gdal: NSObject {
         
         GDALAllRegister()
         
-        guard let inputUrl = URL(string: "file://\(input)"), let outputUrl = URL(string: "file://\(output)") else {
-            print("Invalid input or output path.")
-            reject("1", "Invalid input or output path.", nil)
-            return
-        }
+        let inputUrl = URL(fileURLWithPath: "file://\(input)")
+        let outputUrl = URL(fileURLWithPath: "file://\(output)")
 
         inputUrl.startAccessingSecurityScopedResource()
         outputUrl.startAccessingSecurityScopedResource()
@@ -301,11 +283,7 @@ class Gdal: NSObject {
         let input = srcPath
         GDALAllRegister()
         
-        guard let inputUrl = URL(string: "file://\(input)") else {
-            print("Invalid input or output path.")
-            reject("1", "Invalid input or output path.", nil)
-            return
-        }
+        let inputUrl = URL(fileURLWithPath: "file://\(input)")
 
         inputUrl.startAccessingSecurityScopedResource()
 
