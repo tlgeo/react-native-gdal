@@ -85,6 +85,13 @@ class GdalModule(reactContext: ReactApplicationContext) :
       System.err.println("Dịch không thành công.")
       promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
     }
+
+    // Đẩy dữ liệu vào bộ đệm và commit
+    outDS.FlushCache()
+
+    // Đóng dataset đích để đảm bảo dữ liệu được ghi đầy đủ
+    outDS.delete()
+
     promise.resolve(destPath)
   }
 
