@@ -261,6 +261,20 @@ class Gdal: NSObject {
         // Translate options for GDALVectorTranslate
         let translateOptions = GDALTranslateOptionsNew(options, nil)
 
+        let progressCallback: GDALProgressFunc = { (complete, message, userData) -> Int32 in
+            let percent = Int(complete * 100)
+            
+            if let emitter = Ogr2ogrEventEmitter.eventEmitter {
+                emitter.sendEvent(withName: "onOgr2ogrProgress", body: [
+                    "progress": percent
+                ])
+            }
+
+            return 1
+        }
+        
+        GDALTranslateOptionsSetProgress(translateOptions, progressCallback, nil)
+
         //        var srcDS: [OpaquePointer?] = [OpaquePointer(inputDataset)]
         var srcDS: GDALDatasetH? = inputDataset
         // Translate input dataset to GeoJSON
@@ -312,9 +326,31 @@ class Gdal: NSObject {
         let int32Overviews = overviews.map { Int32($0) }
         
         print("int32Overviews \(int32Overviews)")
+        
+        let progressCallback: GDALProgressFunc = { (complete, message, userData) -> Int32 in
+            let percent = Int(complete * 100)
+            
+            if let emitter = Ogr2ogrEventEmitter.eventEmitter {
+                emitter.sendEvent(withName: "onOgr2ogrProgress", body: [
+                    "progress": percent
+                ])
+            }
+
+            return 1
+        }
 
         // Add overviews
-        let result = GDALBuildOverviews(inputDataset, "AVERAGE", Int32(int32Overviews.count), int32Overviews, 0, nil, nil, nil)
+        let result = GDALBuildOverviews(
+            inputDataset,
+            "AVERAGE",
+            Int32(int32Overviews.count),
+            int32Overviews,
+            0,
+            nil,
+            progressCallback,
+            nil
+        )
+
 
         if result == CE_None {
             print("Successfully added overviews.")
