@@ -8,7 +8,10 @@ import com.facebook.react.uimanager.ViewManager
 
 class GdalPackage : ReactPackage {
   override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-    return listOf(GdalModule(reactContext))
+    return listOf(
+      GdalModule(reactContext),
+      EventEmitter(reactContext)
+    )
   }
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {

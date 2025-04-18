@@ -9,7 +9,10 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableArray
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.WritableNativeMap
 import org.gdal.gdal.InfoOptions
+import org.gdal.gdal.ProgressCallback
 import org.gdal.gdal.TranslateOptions
 import org.gdal.gdal.VectorInfoOptions
 import org.gdal.gdal.VectorTranslateOptions
@@ -21,7 +24,10 @@ import org.gdal.gdal.gdal.Open
 import org.gdal.gdal.gdal.OpenEx
 import org.gdal.gdalconst.gdalconst
 import java.util.Vector
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch // Add this import
+import kotlinx.coroutines.withContext // Add this import
 
 class GdalModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -61,38 +67,74 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun RNOgr2ogr(srcPath: String, destPath: String, args: ReadableArray, promise: Promise) {
+    // Convert ReadableArray to Vector<String>
     val newArgs = Vector<String>()
     for (i in 0 until args.size()) {
       newArgs.add(args.getString(i))
     }
+
+    // Initialize GDAL
     AllRegister()
 
-    var src: String = srcPath
-    var dest: String = destPath
+    // Run the heavy operation in a background thread using coroutines
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        // Open source dataset
+        val srcDS = OpenEx(srcPath)
+        if (srcDS == null) {
+          withContext(Dispatchers.Main) {
+            promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+          }
+          return@launch
+        }
 
-    // Mở dataset nguồn
-    val srcDS = OpenEx(src)
+        // Define progress callback
+        val progressCallback = object : ProgressCallback() {
+          override fun run(dfComplete: Double, message: String?): Int {
+            // Create params for the event
+            val params: WritableMap = WritableNativeMap().apply {
+              putDouble("progress", dfComplete)
+              putString("message", message)
+            }
 
-    if (srcDS == null) {
-      System.err.println("Không thể mở dataset nguồn.")
-      promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+            // Send progress event on the main thread
+            CoroutineScope(Dispatchers.Main).launch {
+              EventEmitter.sendProgress(params)
+            }
+            return 1 // Continue
+          }
+        }
+
+        // Perform VectorTranslate
+        val outDS = gdal.VectorTranslate(
+          destPath,
+          srcDS,
+          VectorTranslateOptions(newArgs),
+          progressCallback
+        )
+
+        if (outDS == null) {
+          withContext(Dispatchers.Main) {
+            promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
+          }
+          return@launch
+        }
+
+        // Flush cache and commit
+        outDS.FlushCache()
+        outDS.delete()
+
+        // Resolve promise on the main thread
+        withContext(Dispatchers.Main) {
+          promise.resolve(destPath)
+        }
+      } catch (e: Exception) {
+        // Handle any unexpected errors
+        withContext(Dispatchers.Main) {
+          promise.reject("ERROR_UNEXPECTED", e.message ?: "Lỗi không xác định.")
+        }
+      }
     }
-
-    // Sử dụng Translate để chuyển đổi dataset sang tệp đích
-    val outDS = gdal.VectorTranslate(dest, srcDS, VectorTranslateOptions(newArgs))
-
-    if (outDS == null) {
-      System.err.println("Dịch không thành công.")
-      promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
-    }
-
-    // Đẩy dữ liệu vào bộ đệm và commit
-    outDS.FlushCache()
-
-    // Đóng dataset đích để đảm bảo dữ liệu được ghi đầy đủ
-    outDS.delete()
-
-    promise.resolve(destPath)
   }
 
   @ReactMethod
@@ -125,35 +167,64 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun RNGdalTranslate(srcPath: String, destPath: String, args: ReadableArray, promise: Promise) {
-    // Convert ReadableArray to String[]
+    // Convert ReadableArray to Vector<String>
     val newArgs = Vector<String>()
     for (i in 0 until args.size()) {
       newArgs.add(args.getString(i))
     }
+
+    // Đăng ký GDAL
     AllRegister()
 
-    var src: String = srcPath
-    var dest: String = destPath
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        // Mở dataset nguồn
+        val srcDS = Open(srcPath, gdalconst.GA_ReadOnly)
+        if (srcDS == null) {
+          withContext(Dispatchers.Main) {
+            promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+          }
+          return@launch
+        }
 
-    // Mở dataset nguồn
-    val srcDS = Open(src, gdalconst.GA_ReadOnly)
+        // Khởi tạo callback tiến trình
+        val progressCallback = object : ProgressCallback() {
+          override fun run(dfComplete: Double, message: String?): Int {
+            val params: WritableMap = WritableNativeMap().apply {
+              putDouble("progress", dfComplete)
+              putString("message", message)
+            }
 
-    if (srcDS == null) {
-      System.err.println("Không thể mở dataset nguồn.")
-      promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+            CoroutineScope(Dispatchers.Main).launch {
+              EventEmitter.sendProgress(params)
+            }
+
+            return 1 // tiếp tục
+          }
+        }
+
+        // Thực hiện chuyển đổi
+        val outDS = gdal.Translate(destPath, srcDS, TranslateOptions(newArgs), progressCallback)
+
+        if (outDS == null) {
+          withContext(Dispatchers.Main) {
+            promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
+          }
+          return@launch
+        }
+
+        // Thành công
+        withContext(Dispatchers.Main) {
+          promise.resolve(destPath)
+        }
+      } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+          promise.reject("EXCEPTION", e.message)
+        }
+      }
     }
-
-    // Sử dụng Translate để chuyển đổi dataset sang tệp đích
-    val outDS = gdal.Translate(dest, srcDS, TranslateOptions(newArgs))
-
-    if (outDS == null) {
-      System.err.println("Dịch không thành công.")
-      promise.reject("ERROR_TRANSLATE", "Dịch không thành công.")
-    }
-
-    println("Dịch thành công.")
-    promise.resolve(destPath)
   }
+
 
   @ReactMethod
   fun RNSetProjLibPath(projLibPath: String, promise: Promise) {
@@ -167,34 +238,57 @@ class GdalModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun RNGdalAddo(srcPath: String, overviews: ReadableArray, promise: Promise) {
-    try {
-      AllRegister()
+    CoroutineScope(Dispatchers.IO).launch {
+      try {
+        AllRegister()
 
-      val dataset = OpenEx(srcPath, gdalconst.GA_Update.toLong())
+        val dataset = OpenEx(srcPath, gdalconst.GA_Update.toLong())
 
+        if (dataset == null) {
+          Log.d("TLGEO", "RNGdalAddo: " + gdal.GetLastErrorMsg())
+          withContext(Dispatchers.Main) {
+            promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
+          }
+          return@launch
+        }
 
-      if (dataset == null) {
-        Log.d("TLGEO", "RNGdalAddo: " + gdal.GetLastErrorMsg())
-        promise.reject("ERROR_OPEN_SRC", "Không thể mở dataset nguồn.")
-        return
+        // Chuyển ReadableArray thành IntArray
+        val levels = overviews.toArrayList().map {
+          (it as Double).toInt()
+        }.toIntArray()
+
+        // Tạo ProgressCallback
+        val progressCallback = object : ProgressCallback() {
+          override fun run(dfComplete: Double, message: String?): Int {
+            val params: WritableMap = WritableNativeMap().apply {
+              putDouble("progress", dfComplete)
+              putString("message", message)
+            }
+
+            Log.d("RNGdalAddo", "run: $dfComplete")
+
+            CoroutineScope(Dispatchers.Main).launch {
+              EventEmitter.sendProgress(params)
+            }
+
+            return 1 // tiếp tục
+          }
+        }
+
+        // Thêm overview với tiến trình
+        dataset.BuildOverviews("NEAREST", levels, progressCallback)
+
+        withContext(Dispatchers.Main) {
+          promise.resolve("Success")
+        }
+      } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+          promise.reject("ERROR_ADDING_OVERVIEWS", e.message, e)
+        }
       }
-
-      // Chuyển đổi ReadableArray thành IntArray
-      val levels = overviews.toArrayList().map {
-        // Chuyển thành Double trước rồi ép kiểu sang Int
-        (it as Double).toInt()
-      }.toIntArray()
-
-      // Thực hiện thêm overviews
-      dataset.BuildOverviews("NEAREST", levels)
-
-      // Trả về kết quả thành công
-      promise.resolve("Success")
-    } catch (e: Exception) {
-      // Bắt ngoại lệ và trả về lỗi
-      promise.reject("ERROR_ADDING_OVERVIEWS", e)
     }
   }
+
 
   companion object {
     const val NAME = "Gdal"

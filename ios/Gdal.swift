@@ -90,7 +90,7 @@ class Gdal: NSObject {
             }
             DispatchQueue.main.async {
                    Ogr2ogrEventEmitter.eventEmitter?.sendEvent(
-                       withName: "onOgr2ogrProgress",
+                       withName: "onProgress",
                        body: ["progress": progress]
                    )
                }
@@ -265,7 +265,7 @@ class Gdal: NSObject {
             let percent = Int(complete * 100)
             
             if let emitter = Ogr2ogrEventEmitter.eventEmitter {
-                emitter.sendEvent(withName: "onOgr2ogrProgress", body: [
+                emitter.sendEvent(withName: "onProgress", body: [
                     "progress": percent
                 ])
             }
@@ -331,7 +331,7 @@ class Gdal: NSObject {
             let percent = Int(complete * 100)
             
             if let emitter = Ogr2ogrEventEmitter.eventEmitter {
-                emitter.sendEvent(withName: "onOgr2ogrProgress", body: [
+                emitter.sendEvent(withName: "onProgress", body: [
                     "progress": percent
                 ])
             }
