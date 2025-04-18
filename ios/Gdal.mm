@@ -1,4 +1,5 @@
 #import <React/RCTBridgeModule.h>
+#import <React/RCTEventEmitter.h>
 
 @interface RCT_EXTERN_MODULE(Gdal, NSObject)
 
@@ -41,4 +42,12 @@ RCT_EXTERN_METHOD(RNGdalAddo:(NSString *)srcPath
   return NO;
 }
 
+@end
+
+
+@interface RCT_EXTERN_MODULE(Ogr2ogrEventEmitter, RCTEventEmitter)
++ (BOOL)requiresMainQueueSetup
+{
+  return NO;
+}
 @end

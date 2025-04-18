@@ -1,3 +1,5 @@
+import Foundation
+
 @objc(Gdal)
 class Gdal: NSObject {
 
@@ -86,6 +88,12 @@ class Gdal: NSObject {
             } else {
                 print("Progress: \(Int(progress * 100))%")
             }
+            DispatchQueue.main.async {
+                   Ogr2ogrEventEmitter.eventEmitter?.sendEvent(
+                       withName: "onOgr2ogrProgress",
+                       body: ["progress": progress]
+                   )
+               }
             return 1 // Return 1 to continue processing, 0 to cancel
         }
 
