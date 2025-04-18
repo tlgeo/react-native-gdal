@@ -1,11 +1,11 @@
-@objc(Ogr2ogrEventEmitter)
-class Ogr2ogrEventEmitter: RCTEventEmitter {
+@objc(EventEmitter)
+class EventEmitter: RCTEventEmitter {
 
-    static var eventEmitter: Ogr2ogrEventEmitter!
+    static var eventEmitter: EventEmitter!
 
     override init() {
         super.init()
-        Ogr2ogrEventEmitter.eventEmitter = self
+        EventEmitter.eventEmitter = self
     }
 
     override func supportedEvents() -> [String]! {

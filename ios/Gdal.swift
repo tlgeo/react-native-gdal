@@ -89,7 +89,7 @@ class Gdal: NSObject {
                 print("Progress: \(Int(progress * 100))%")
             }
             DispatchQueue.main.async {
-                   Ogr2ogrEventEmitter.eventEmitter?.sendEvent(
+                   EventEmitter.eventEmitter?.sendEvent(
                        withName: "onProgress",
                        body: ["progress": progress]
                    )
@@ -264,7 +264,7 @@ class Gdal: NSObject {
         let progressCallback: GDALProgressFunc = { (complete, message, userData) -> Int32 in
             let percent = Int(complete * 100)
             
-            if let emitter = Ogr2ogrEventEmitter.eventEmitter {
+            if let emitter = EventEmitter.eventEmitter {
                 emitter.sendEvent(withName: "onProgress", body: [
                     "progress": percent
                 ])
@@ -330,7 +330,7 @@ class Gdal: NSObject {
         let progressCallback: GDALProgressFunc = { (complete, message, userData) -> Int32 in
             let percent = Int(complete * 100)
             
-            if let emitter = Ogr2ogrEventEmitter.eventEmitter {
+            if let emitter = EventEmitter.eventEmitter {
                 emitter.sendEvent(withName: "onProgress", body: [
                     "progress": percent
                 ])

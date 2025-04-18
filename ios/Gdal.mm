@@ -45,7 +45,7 @@ RCT_EXTERN_METHOD(RNGdalAddo:(NSString *)srcPath
 @end
 
 
-@interface RCT_EXTERN_MODULE(Ogr2ogrEventEmitter, RCTEventEmitter)
+@interface RCT_EXTERN_MODULE(EventEmitter, RCTEventEmitter)
 + (BOOL)requiresMainQueueSetup
 {
   return NO;
